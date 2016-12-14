@@ -32,7 +32,6 @@ import java.util.Queue;
 
 public class PathDictionary {
     private static final int MAX_WORD_LENGTH = 4;
-    private static HashSet<String> words = new HashSet<>();
     private WordGraph graph = new SimpleWordGraph();
 
     public PathDictionary(InputStream inputStream) throws IOException {
@@ -59,7 +58,7 @@ public class PathDictionary {
     }
 
     public boolean isWord(String word) {
-        return words.contains(word.toLowerCase());
+        return graph.isWord(word.toLowerCase());
     }
 
     private ArrayList<String> neighbours(String word) {

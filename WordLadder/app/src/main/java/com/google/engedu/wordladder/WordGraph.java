@@ -20,6 +20,23 @@ import java.util.ArrayList;
 import java.util.List;
 
 public interface WordGraph {
+    /**
+     * Gets the neighbors of a word, i.e. other words that differ in just one character.
+     * @param word
+     * @return The list of neighboring words, or null if word is not in the dict.
+     */
     ArrayList<String> getNeighbors(String word);
+
+    /**
+     * Adds a word to the graph.
+     * @param word
+     */
     void addWord(String word);
+
+    /**
+     * Checks whether a word is in the graph.
+     * @param word
+     * @return true if the word is in the graph.
+     */
+    boolean isWord(String word);
 }

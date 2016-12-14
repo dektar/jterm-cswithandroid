@@ -52,6 +52,11 @@ public class SimpleWordGraph implements WordGraph {
         graph.put(word, neighbors);
     }
 
+    @Override
+    public boolean isWord(String word) {
+        return graph.containsKey(word);
+    }
+
     /**
      * Compares two words to see if they are neighbors, i.e. if they are equal in all but one
      * character.
