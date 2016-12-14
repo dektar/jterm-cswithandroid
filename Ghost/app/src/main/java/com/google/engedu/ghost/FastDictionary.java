@@ -59,6 +59,7 @@ public class FastDictionary implements GhostDictionary {
 
     @Override
     public String getGoodWordStartingWith(String prefix) {
+        // TODO
         return root.getGoodWordStartingWith(prefix);
     }
 }

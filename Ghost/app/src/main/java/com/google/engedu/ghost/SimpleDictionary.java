@@ -80,11 +80,13 @@ public class SimpleDictionary implements GhostDictionary {
      * @return The index of a word that starts with this prefix, or -1 if none is found.
      */
     private int binarySearchForPrefix(int startIndex, int endIndex, String prefix) {
-        // Base cases: there are no items left to search.
+        // Base cases
         if (startIndex == endIndex) {
+            // there are no items left to search.
             return -1;
         }
         if (startIndex == endIndex - 1) {
+            // There is only one item left -- so if it's the right one, return it! Otherwise, -1.
             return words.get(startIndex).startsWith(prefix) ? startIndex : -1;
         }
         int mid = (startIndex + endIndex) / 2;
@@ -104,7 +106,7 @@ public class SimpleDictionary implements GhostDictionary {
 
     @Override
     public String getGoodWordStartingWith(String prefix) {
-        // TODO
+        // TODO - need a binary search to find the indexes of first and last words with this prefix
         String selected = getAnyWordStartingWith(prefix);
         return selected;
     }
