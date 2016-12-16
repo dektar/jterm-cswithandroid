@@ -23,7 +23,7 @@
     android:paddingLeft="@dimen/activity_horizontal_margin"
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin"
-
+    app:layout_behavior="@string/appbar_scrolling_view_behavior"
     tools:context="com.google.engedu.wordladder.WordSelectionActivity"
     tools:showIn="@layout/activity_word_selection">
 
@@ -32,13 +32,13 @@
         android:layout_height="match_parent"
         android:id="@+id/welcomeTextView"
         android:text="Enter a start and end word for the ladder" />
+
     <EditText
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:id="@+id/startWord"
         android:layout_marginTop="59dp"
         android:layout_alignParentTop="true"
-        android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true" />
 
     <EditText
@@ -47,9 +47,7 @@
         android:id="@+id/endWord"
         android:layout_below="@+id/startWord"
         android:layout_marginTop="12dp"
-        android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true"
-        android:layout_alignRight="@+id/startWord"
         android:layout_alignEnd="@+id/startWord" />
     <TextView
         android:layout_width="match_parent"
@@ -65,7 +63,6 @@
         android:text="START"
         android:id="@+id/button"
         android:layout_below="@+id/messageTextView"
-        android:layout_alignParentRight="true"
         android:layout_alignParentEnd="true"
         android:onClick="onStart"
         android:layout_marginTop="30dp" />

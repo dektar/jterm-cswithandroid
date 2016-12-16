@@ -29,7 +29,7 @@ import java.util.Queue;
 
 public class PathDictionary {
     private static final int MAX_WORD_LENGTH = 4;
-    private static final int MAX_SEARCH_DEPTH = 10;
+    private static final int MAX_SEARCH_DEPTH = 6;
     private WordGraph graph = new SimpleWordGraph();
 
     public PathDictionary(InputStream inputStream) throws IOException {
@@ -78,12 +78,10 @@ public class PathDictionary {
 
         // Breadth first search can be implemented with a "while" loop, which continues to search
         // until the queue is empty. Initialize the queue with the start string.
-        int searchDepth = 0;
+
         queue.add(initial);
         while (!queue.isEmpty()) {
             List<String> current = queue.remove();
-            searchDepth++;
-
             // The final element in the next list is the most recently added graph point.
             // Find its neighbors and add them to the list, then enqueue the newly created lists,
             // to continue the search.
@@ -99,7 +97,7 @@ public class PathDictionary {
                 if (neighbor.equals(end)) {
                     return next;
                 }
-                if (searchDepth >= MAX_SEARCH_DEPTH) {
+                if (next.size() > MAX_SEARCH_DEPTH) {
                     continue;
                 }
                 queue.add(next);

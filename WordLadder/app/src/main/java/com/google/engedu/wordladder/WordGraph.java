@@ -17,8 +17,10 @@
 package com.google.engedu.wordladder;
 
 import java.util.ArrayList;
-import java.util.List;
 
+/**
+ * The interface to a WordGraph. This can be implemented in different ways!
+ */
 public interface WordGraph {
     /**
      * Gets the neighbors of a word, i.e. other words that differ in just one character.
