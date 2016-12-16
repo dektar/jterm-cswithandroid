@@ -24,14 +24,12 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Queue;
 
 public class PathDictionary {
     private static final int MAX_WORD_LENGTH = 4;
+    private static final int MAX_SEARCH_DEPTH = 10;
     private WordGraph graph = new SimpleWordGraph();
 
     public PathDictionary(InputStream inputStream) throws IOException {
@@ -61,12 +59,53 @@ public class PathDictionary {
         return graph.isWord(word.toLowerCase());
     }
 
-    private ArrayList<String> neighbours(String word) {
-        return graph.getNeighbors(word);
-    }
+    /**
+     * Finds the set of words connecting two words, or returns null if none is possible.
+     * @param start
+     * @param end
+     * @return
+     */
+    public List<String> findPath(String start, String end) {
+        if (start == null || end == null || start.length() != end.length() || start.equals(end)) {
+            return null;
+        }
+        // Here we will hold all the paths ending in the nodes we wish to search next.
+        // We could store just a Queue<String> if we only wanted to know if a path exists, but
+        // we need to store the whole List<String> to remember the path as we walk down it.
+        Queue<List<String>> queue = new ArrayDeque<>();
+        List<String> initial = new ArrayList<>();
+        initial.add(start);
 
-    public String[] findPath(String start, String end) {
-        // Breadth first search
+        // Breadth first search can be implemented with a "while" loop, which continues to search
+        // until the queue is empty. Initialize the queue with the start string.
+        int searchDepth = 0;
+        queue.add(initial);
+        while (!queue.isEmpty()) {
+            List<String> current = queue.remove();
+            searchDepth++;
+
+            // The final element in the next list is the most recently added graph point.
+            // Find its neighbors and add them to the list, then enqueue the newly created lists,
+            // to continue the search.
+            List<String> neighbors = graph.getNeighbors(current.get(current.size() - 1));
+            for (String neighbor : neighbors) {
+                if (current.contains(neighbor)) {
+                    // No repeats.
+                    continue;
+                }
+                List<String> next = new ArrayList<>(current);
+                next.add(neighbor);
+                // If the neighbor is equal to the end, we are done! Return early.
+                if (neighbor.equals(end)) {
+                    return next;
+                }
+                if (searchDepth >= MAX_SEARCH_DEPTH) {
+                    continue;
+                }
+                queue.add(next);
+            }
+        }
+        // We didn't find anything.
         return null;
     }
 }

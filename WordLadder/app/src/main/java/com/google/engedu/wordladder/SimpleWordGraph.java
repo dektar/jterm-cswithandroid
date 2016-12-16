@@ -20,6 +20,7 @@ import android.support.annotation.VisibleForTesting;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -66,7 +67,7 @@ public class SimpleWordGraph implements WordGraph {
      */
     @VisibleForTesting
     boolean isNeighbor(String word1, String word2) {
-        if (word1.length() != word2.length()) {
+        if (word1 == null || word2 == null || word1.length() != word2.length()) {
             // The words need to be the same length.
             return false;
         }

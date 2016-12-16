@@ -31,6 +31,7 @@ import com.google.engedu.worldladder.R;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.List;
 
 public class WordSelectionActivity extends AppCompatActivity {
 
@@ -55,7 +56,7 @@ public class WordSelectionActivity extends AppCompatActivity {
     public boolean onStart(View view) {
         TextView startWordView = (TextView) findViewById(R.id.startWord);
         TextView endWordView = (TextView) findViewById(R.id.endWord);
-        String[] words = dictionary.findPath(
+        List<String> words = dictionary.findPath(
                 startWordView.getText().toString().toLowerCase(),
                 endWordView.getText().toString().toLowerCase());
         if (words != null) {
