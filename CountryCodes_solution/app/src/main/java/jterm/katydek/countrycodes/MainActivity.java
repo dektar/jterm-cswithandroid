@@ -56,9 +56,12 @@ public class MainActivity extends AppCompatActivity {
         //
         // Use the input query to find and return the matching country code.
         // Make sure to check your edge cases! How will you handle errors?
-        // Your code here
         //
-        return "not yet implemented! cats rock!";
+        if (mCountryCodes.containsKey(query.toLowerCase())) {
+            return mCountryCodes.get(query);
+        } else {
+            return "Error! " + query + " not found.";
+        }
     }
 
     private void readCountryCodesFile() {
@@ -73,8 +76,13 @@ public class MainActivity extends AppCompatActivity {
                 String[] parts = line.split(",");
                 //
                 // Now we need to populate the mCountryCodes HashMap so we can use it for lookup!
-                // Your code here.
                 //
+                // Check that the line is well formatted
+                if (parts.length == 3) {
+                    // The third element is the country code, and the second is the country.
+                    // Add these to our HashMap
+                    mCountryCodes.put(parts[2].toLowerCase(), parts[1].toLowerCase());
+                }
                 line = reader.readLine();
             }
             inputStream.close();
