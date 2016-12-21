@@ -30,16 +30,32 @@ import android.text.TextUtils;
 public class AnagramDictionaryTest {
     @Test
     public void testSortLetters() {
-        assertEquals(AnagramDictionary.sortLetters("a"), "a");
+        assertEquals(AnagramDictionary.sortLetters("cat"), "act");
+        assertEquals(AnagramDictionary.sortLetters("abcde"), "abcde");
+        assertEquals(AnagramDictionary.sortLetters("edcba"), "abcde");
+        assertNotEquals(AnagramDictionary.sortLetters("abcdef"), "abcde");
     }
 
     @Test
     public void testIsAnagram() {
-        assertTrue(AnagramDictionary.isAnagram("a", "a"));
+        assertTrue(AnagramDictionary.isAnagram("cat", "act"));
+        assertTrue(AnagramDictionary.isAnagram("spots", "stops"));
+        assertFalse(AnagramDictionary.isAnagram("cat", "dog"));
+        assertFalse(AnagramDictionary.isAnagram("cat", ""));
     }
 
+    /**
+     * Example:
+     * Input                      | Output
+     * ---------------------------| ------
+     * isGoodWord("nonstop")      | true
+     * isGoodWord("poster")       | false
+     * isGoodWord("lamp post")    | false
+     * isGoodWord("spots")        | true
+     * isGoodWord("apostrophe")   | false
+     */
     @Test
     public void testIsGoodWord() {
-       // TODO: This may need to be in AndroidTest
+       // This may need to be an androidTest.
     }
 }
