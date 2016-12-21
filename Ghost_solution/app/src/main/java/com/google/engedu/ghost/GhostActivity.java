@@ -108,7 +108,7 @@ public class GhostActivity extends AppCompatActivity {
     @Override
     public boolean onKeyUp(int keyCode, KeyEvent event) {
         int unicode = event.getUnicodeChar();
-        if ('A' <= unicode && unicode <= 'z') {
+        if (('A' <= unicode && unicode <= 'Z') || 'a' <= unicode && unicode <= 'z') {
             String character = ((char) unicode + "").toLowerCase();
             currentWord += character;
             ((TextView) findViewById(R.id.ghostText)).setText(currentWord);
