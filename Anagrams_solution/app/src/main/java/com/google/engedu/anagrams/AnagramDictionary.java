@@ -39,7 +39,7 @@ public class AnagramDictionary {
     private static final int MAX_WORD_LENGTH = 7;
     private Random random = new Random();
 
-    //private ArrayList<String> wordList = new ArrayList<>();
+    //private ArrayList<String> wordList = new ArrayList<>();  // ArrayList implementation
     private HashSet<String> wordSet = new HashSet<>();
     private HashMap<String, ArrayList<String>> lettersToWord = new HashMap<>();
 
@@ -49,20 +49,35 @@ public class AnagramDictionary {
         while((line = in.readLine()) != null) {
             String word = line.trim();
             if (!TextUtils.isEmpty(word)) {
-                //wordList.add(word);
-                wordSet.add(word);
-                String letters = sortLetters(word);
-                if (lettersToWord.containsKey(letters)) {
-                    lettersToWord.get(letters).add(word);
-                } else {
-                    ArrayList<String> newList = new ArrayList<String>();
-                    newList.add(word);
-                    lettersToWord.put(letters, newList);
-                }
+                //wordList.add(word);  // ArrayList implementation
+                addWordToDict(word);
             }
         }
     }
 
+    @VisibleForTesting
+    public AnagramDictionary(String[] words) {
+        for (int i = 0; i < words.length; i++) {
+            addWordToDict(words[i]);
+        }
+    }
+
+    private void addWordToDict(String word) {
+        wordSet.add(word);
+        String letters = sortLetters(word);
+        if (lettersToWord.containsKey(letters)) {
+            lettersToWord.get(letters).add(word);
+        } else {
+            ArrayList<String> newList = new ArrayList<String>();
+            newList.add(word);
+            lettersToWord.put(letters, newList);
+        }
+    }
+
+    /**
+     * Asserts that the given word is in the dictionary and isn't formed by adding a letter to the
+     * start or end of the base word.
+     */
     public boolean isGoodWord(String word, String base) {
         if (!wordSet.contains(word)) {
             return false;
@@ -75,7 +90,7 @@ public class AnagramDictionary {
 
     public ArrayList<String> getAnagrams(String targetWord) {
         /*
-        // Brute force method
+        // ArrayList brute force method
         ArrayList<String> result = new ArrayList<String>();
         for (String word : wordList) {
             if (isAnagram(targetWord, word)) {
@@ -130,8 +145,6 @@ public class AnagramDictionary {
     }
 
     public String pickGoodStarterWord() {
-        // TODO: ArrayList implementation of the same.
-
         Object[] keys = lettersToWord.keySet().toArray();
         String next = (String) keys[random.nextInt(keys.length)];
         while (lettersToWord.get(next).size() < MIN_NUM_ANAGRAMS) {

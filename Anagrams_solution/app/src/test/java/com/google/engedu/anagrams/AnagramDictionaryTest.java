@@ -22,18 +22,23 @@ import static org.junit.Assert.*;
 
 import android.text.TextUtils;
 
+import java.io.InputStream;
+import java.util.List;
+
 
 /**
  * Tests for AnagramDictionary
  */
 
 public class AnagramDictionaryTest {
+    String[] words = {"act", "cat", "dog", "pot", "pots", "spots", "stop", "stops"};
+
     @Test
     public void testSortLetters() {
-        assertEquals(AnagramDictionary.sortLetters("cat"), "act");
-        assertEquals(AnagramDictionary.sortLetters("abcde"), "abcde");
-        assertEquals(AnagramDictionary.sortLetters("edcba"), "abcde");
-        assertNotEquals(AnagramDictionary.sortLetters("abcdef"), "abcde");
+        assertEquals("act", AnagramDictionary.sortLetters("cat"));
+        assertEquals("abcde", AnagramDictionary.sortLetters("abcde"));
+        assertEquals("abcde", AnagramDictionary.sortLetters("edcba"));
+        assertNotEquals("abcde", AnagramDictionary.sortLetters("abcdef"));
     }
 
     @Test
@@ -44,18 +49,34 @@ public class AnagramDictionaryTest {
         assertFalse(AnagramDictionary.isAnagram("cat", ""));
     }
 
+    @Test
+    public void testGetAnagrams() {
+        AnagramDictionary dict = new AnagramDictionary(words);
+        List<String> result = dict.getAnagrams("cat");
+        assertEquals(2, result.size());
+        assertTrue(result.contains("cat"));
+        assertTrue(result.contains("act"));
+        assertFalse(result.contains("dog"));
+        assertFalse(result.contains("spots"));
+
+        assertTrue(dict.getAnagrams("stops").contains("spots"));
+    }
+
     /**
      * Example:
-     * Input                      | Output
-     * ---------------------------| ------
-     * isGoodWord("nonstop")      | true
-     * isGoodWord("poster")       | false
-     * isGoodWord("lamp post")    | false
-     * isGoodWord("spots")        | true
-     * isGoodWord("apostrophe")   | false
+     * Input                              | Output
+     * -----------------------------------| ------
+     * isGoodWord("nonstop", "post")      | true
+     * isGoodWord("poster", "post")       | false
+     * isGoodWord("lamp post", "post")    | false
+     * isGoodWord("spots", "post")        | true
+     * isGoodWord("apostrophe", "post")   | false
      */
     @Test
     public void testIsGoodWord() {
-       // This may need to be an androidTest.
+        AnagramDictionary dict = new AnagramDictionary(words);
+        assertTrue(dict.isGoodWord("stops", "pot"));
+        assertFalse(dict.isGoodWord("pots", "pot"));
+        assertFalse(dict.isGoodWord("abcdefg", "cat"));
     }
 }
