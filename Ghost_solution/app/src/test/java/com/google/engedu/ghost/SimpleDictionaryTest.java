@@ -40,6 +40,7 @@ public class SimpleDictionaryTest {
         SimpleDictionary dict = new SimpleDictionary(words, 0);
 
         assertTrue(dict.isWord("cat"));
+        assertTrue(dict.isWord("cats"));
         assertFalse(dict.isWord("c"));
         assertFalse(dict.isWord("fish"));
     }
@@ -69,6 +70,43 @@ public class SimpleDictionaryTest {
         assertEquals("apple", dict.getAnyWordStartingWith("ap"));
         assertEquals("apple", dict.getAnyWordStartingWith("app"));
         assertEquals("apple", dict.getAnyWordStartingWith("appl"));
-        assertNull(dict.getAnyWordStartingWith("apple"));
+    }
+
+    @Test
+    public void testFindFirstIndexStartingWith() {
+        ArrayList<String> words = new ArrayList<>(Arrays.asList(wordsArray));
+        SimpleDictionary dict = new SimpleDictionary(words, 0);
+
+        assertEquals(0, dict.findFirstIndexStartingWith("a"));
+        assertEquals(1, dict.findFirstIndexStartingWith("cat"));
+        assertEquals(13, dict.findFirstIndexStartingWith("li"));
+        assertEquals(14, dict.findFirstIndexStartingWith("liv"));
+    }
+
+    @Test
+    public void testFindLastIndexStartingWith() {
+        ArrayList<String> words = new ArrayList<>(Arrays.asList(wordsArray));
+        SimpleDictionary dict = new SimpleDictionary(words, 0);
+
+        assertEquals(0, dict.findLastIndexStartingWith("a"));
+        assertEquals(8, dict.findLastIndexStartingWith("cat"));
+        assertEquals(14, dict.findLastIndexStartingWith("li"));
+        assertEquals(14, dict.findLastIndexStartingWith("liv"));
+    }
+
+    @Test
+    public void testGetGoodWordStartingWith() {
+        ArrayList<String> words = new ArrayList<>(Arrays.asList(wordsArray));
+        SimpleDictionary dict = new SimpleDictionary(words, 0);
+
+        assertEquals("life", dict.getGoodWordStartingWith("li"));
+        assertEquals("lives", dict.getGoodWordStartingWith("l"));
+
+        assertEquals("apple", dict.getGoodWordStartingWith("a"));
+
+        // The computer wants to find a word where the number of moves left are even, so that its
+        // play creates an odd length of word, and the user must end on an even word and lose.
+        assertEquals(0, dict.getGoodWordStartingWith("ca").length() % 2);
+        assertEquals(1, dict.getGoodWordStartingWith("cat").length() % 2);
     }
 }

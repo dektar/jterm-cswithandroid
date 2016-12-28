@@ -1,5 +1,7 @@
 package com.google.engedu.ghost;
 
+import junit.framework.Assert;
+
 import org.junit.Test;
 
 import java.util.ArrayList;
@@ -26,7 +28,7 @@ import static org.junit.Assert.assertTrue;
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-public class TrieNodeTest {
+public class FastDictionaryTest {
     String[] wordsArray = {"apple", "cat", "caterwaul", "caterwauled", "caterwauling", "caterwauls",
             "catfish", "catfishes", "cats", "dog", "dogs", "dogfish", "dogfishes", "life", "lives"};
 
@@ -36,6 +38,7 @@ public class TrieNodeTest {
         FastDictionary dict = new FastDictionary(words);
 
         assertTrue(dict.isWord("cat"));
+        assertTrue(dict.isWord("cats"));
         assertFalse(dict.isWord("c"));
         assertFalse(dict.isWord("fish"));
     }
@@ -50,11 +53,9 @@ public class TrieNodeTest {
         assertNull(dict.getAnyWordStartingWith("caq"));
         assertNotNull(dict.getAnyWordStartingWith(""));
 
-        // A word that cannot grow returns null -- nothing has this substring and is longer.
-        assertNull(dict.getAnyWordStartingWith("catfishes"));
-
         // Check some substrings
-        assertEquals("catfishes", dict.getAnyWordStartingWith("catfish"));
+        assertEquals("catfishes", dict.getAnyWordStartingWith("catfishe"));
+        assertEquals("catfishes", dict.getAnyWordStartingWith("catfishes"));
         assertTrue(dict.getAnyWordStartingWith("cat").startsWith("cat"));
 
         // Check last word in the dict
@@ -65,6 +66,22 @@ public class TrieNodeTest {
         assertEquals("apple", dict.getAnyWordStartingWith("ap"));
         assertEquals("apple", dict.getAnyWordStartingWith("app"));
         assertEquals("apple", dict.getAnyWordStartingWith("appl"));
-        assertNull(dict.getAnyWordStartingWith("apple"));
+    }
+
+    @Test
+    public void testGetGoodWordStartingWith() {
+        ArrayList<String> words = new ArrayList<>(Arrays.asList(wordsArray));
+        FastDictionary dict = new FastDictionary(words);
+
+        // Shouldn't pick the word itself if another option is available
+        assertFalse("cat".equals(dict.getGoodWordStartingWith("cat")));
+        assertEquals("catfishes", dict.getGoodWordStartingWith("catfishes"));
+        assertEquals("catfishes", dict.getGoodWordStartingWith("catfish"));
+
+
+        assertEquals("apple", dict.getGoodWordStartingWith("a"));
+
+        // Only use that word if it is the only option
+        assertEquals("apple", dict.getGoodWordStartingWith("apple"));
     }
 }

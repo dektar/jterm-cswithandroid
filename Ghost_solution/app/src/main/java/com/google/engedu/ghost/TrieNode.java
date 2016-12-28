@@ -15,23 +15,27 @@
 
 package com.google.engedu.ghost;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
+import java.util.Random;
 
 
 public class TrieNode {
     private HashMap<String, TrieNode> children;
     private boolean isWord;
+    private Random mRandom;
 
     public TrieNode() {
         children = new HashMap<>();
         isWord = false;
+        mRandom = new Random();
     }
 
     public void add(String s) {
         if (s.length() == 0) {
-            TrieNode child = new TrieNode();
-            children.put("", child);
+            isWord = true;
             return;
         }
         String firstChar = s.substring(0, 1);
@@ -48,7 +52,7 @@ public class TrieNode {
     public boolean isWord(String s) {
         // Are we at the base node?
         if (s.length() == 0) {
-            return children.containsKey(s);
+            return isWord;
         }
         // Do we have children that start with this character?
         String firstChar = s.substring(0, 1);
@@ -66,24 +70,21 @@ public class TrieNode {
         if (s == null) {
             if (children.size() > 0) {
                 // Pick any next character and return that word
-                String nextChar = children.keySet().iterator().next(); // TODO: Use a random.
+                String nextChar = pickRandomChildChar();
                 String nextSuffix = children.get(nextChar).getAnyWordStartingWith(null);
                 return nextChar + nextSuffix;
             } else {
                 return "";
             }
         }
-        // If s has no length next but is not null, we need to return a word that is at least
-        // one character longer.
         if (s.length() == 0) {
+            if (children.size() == 0 && isWord) {
+                // We are a leaf node and a word!
+                return "";
+            }
             if (children.size() > (children.containsKey("") ? 1 : 0)) {
-                // Pick any next character and return that word, as long as the character is not
-                // also the empty string.
-                Iterator<String> iter = children.keySet().iterator(); // TODO use a random
-                String nextChar = iter.next();
-                if (nextChar.equals("")) {
-                    nextChar = iter.next();
-                }
+                // Pick any next character and return that word
+                String nextChar = pickRandomChildChar();
                 String nextSuffix = children.get(nextChar).getAnyWordStartingWith(null);
                 return nextChar + nextSuffix;
             }
@@ -103,8 +104,63 @@ public class TrieNode {
         return null;
     }
 
+    // Pick a random child character from all the children.
+    private String pickRandomChildChar() {
+        int index = mRandom.nextInt(children.size());
+        int reached = 0;
+        // Assume that the children's order doesn't change after creation so that this is truly
+        // random.
+        for (String s : children.keySet()) {
+            if (index == reached) {
+                return s;
+            }
+            reached++;
+        }
+        return null;
+    }
+
+    // Pick a random child character which is not itself a word, if possible, from all the children.
+    private String pickRandomGoodChildChar() {
+        List<String> goodKeys = new ArrayList<>();
+        List<String> otherKeys = new ArrayList<>();
+        for (String s : children.keySet()) {
+            if (children.get(s).isWord) {
+                otherKeys.add(s);
+            } else {
+                goodKeys.add(s);
+            }
+        }
+        if (goodKeys.size() > 0) {
+            return goodKeys.get(mRandom.nextInt(goodKeys.size()));
+        } else {
+            return otherKeys.get(mRandom.nextInt(otherKeys.size()));
+        }
+    }
+
+    /**
+     * This method should consider all the children of the current prefix and attempt to randomly
+     * pick one that is not a complete word. Only if all the children of the current prefix are
+     * words should it randomly select one of those. This is not an optimum computer player but
+     * should make the game quite a bit more challenging.
+     */
     public String getGoodWordStartingWith(String s) {
-        // TODO
-        return getAnyWordStartingWith(s);
+        if (s.length() == 0) {
+            if (children.size() == 0) {
+                // If there are no children, it depends on if we are a word.
+                return isWord ? "" : null;
+            }
+            // Pick a child that is not a complete word, if possible.
+            String childChar = pickRandomGoodChildChar();
+            return childChar + children.get(childChar).getGoodWordStartingWith(s);
+        }
+        String firstChar = s.substring(0, 1);
+        if (children.containsKey(firstChar)) {
+            String result = children.get(firstChar).getGoodWordStartingWith(s.substring(1));
+            if (result == null) {
+                return null;
+            }
+            return firstChar + result;
+        }
+        return null;
     }
 }
