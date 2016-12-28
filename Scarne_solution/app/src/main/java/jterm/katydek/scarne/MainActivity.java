@@ -32,6 +32,16 @@ public class MainActivity extends AppCompatActivity {
     private static final String YOUR_TURN_DESCRIPTION = " your turn score: %d";
     private static final String COMPUTER_TURN_DESCRIPTION = " computer turn score: %d";
 
+    private static final int COMPUTER_TURN_DELAY = 1000;
+
+    // For saving instance state.
+    private static final String KEY_USER_SCORE = "key_user_score";
+    private static final String KEY_USER_TURN_SCORE = "key_user_turn_score";
+    private static final String KEY_COMP_SCORE = "key_comp_score";
+    private static final String KEY_COMP_TURN_SCORE = "key_comp_turn_score";
+    private static final String KEY_CURRENT_DICE_VALUE = "key_current_dice_value";
+    private static final String KEY_IS_USER_TURN = "key_user_turn";
+
     // The user's overall score state
     private int mUserScore;
 
@@ -43,6 +53,9 @@ public class MainActivity extends AppCompatActivity {
 
     // The computer's turn score
     private int mCompTurnScore;
+
+    // The current dice value
+    private int mDiceValue;
 
     private Random mRandom;
     private Handler mHandler;
@@ -94,7 +107,52 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         };
-        reset();
+        if (savedInstanceState == null) {
+            reset();
+        } else {
+            resumeFromState(savedInstanceState);
+        }
+    }
+
+    @Override
+    protected void onDestroy() {
+        mHandler.removeCallbacks(mRunnable);
+        mRunnable = null;
+        mHandler = null;
+        super.onDestroy();
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        // Save all the relevant variables.
+        outState.putInt(KEY_USER_SCORE, mUserScore);
+        outState.putInt(KEY_USER_TURN_SCORE, mUserTurnScore);
+        outState.putInt(KEY_COMP_SCORE, mCompScore);
+        outState.putInt(KEY_COMP_TURN_SCORE, mCompTurnScore);
+        outState.putInt(KEY_CURRENT_DICE_VALUE, mDiceValue);
+        outState.putBoolean(KEY_IS_USER_TURN, mIsUsersTurn);
+    }
+
+    private void resumeFromState(Bundle savedInstanceState) {
+        // Load the variables from saved state.
+        mUserScore = savedInstanceState.getInt(KEY_USER_SCORE);
+        mUserTurnScore = savedInstanceState.getInt(KEY_USER_TURN_SCORE);
+        mCompScore = savedInstanceState.getInt(KEY_COMP_SCORE);
+        mCompTurnScore = savedInstanceState.getInt(KEY_COMP_TURN_SCORE);
+        mIsUsersTurn = savedInstanceState.getBoolean(KEY_IS_USER_TURN);
+
+        // Update the UI
+        updateDiceImage(mDiceValue);
+        updateText();
+
+        // Resume the computer's turn, if applicable.
+        if (!mIsUsersTurn) {
+            // This will update the button state and start the computer turn. But we have to fake
+            // set the user turn to true to get it started properly.
+            mIsUsersTurn = true;
+            switchTurns();
+        }
     }
 
     private void reset() {
@@ -102,6 +160,7 @@ public class MainActivity extends AppCompatActivity {
         mUserTurnScore = 0;
         mCompScore = 0;
         mCompTurnScore = 0;
+        mDiceValue = -1;
         if (!mIsUsersTurn) {
             switchTurns();
         }
@@ -109,9 +168,9 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void roll() {
-        int value = mRandom.nextInt(6);
-        updateDiceImage(value);
-        doRollLogic(value + 1);
+        mDiceValue = mRandom.nextInt(6);
+        updateDiceImage(mDiceValue);
+        doRollLogic(mDiceValue + 1);
         updateText();
         // Here we could add logic to make one player or the other win!
     }
@@ -164,7 +223,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void doComputerTurn() {
-        mHandler.postDelayed(mRunnable, 500);
+        mHandler.postDelayed(mRunnable, COMPUTER_TURN_DELAY);
     }
 
     private void updateText() {
