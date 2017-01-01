@@ -16,6 +16,18 @@
 
 package com.google.engedu.continentaldivide;
 
+import org.junit.Test;
+
+import static org.junit.Assert.assertEquals;
+
 public class ContinentMapControllerTest {
 
+    @Test
+    public void testGetBoardSize() {
+        ContinentMapController controller = new ContinentMapController(new Integer[] {1});
+        assertEquals(1, controller.getBoardSize());
+
+        controller = new ContinentMapController(ContinentMapController.DEFAULT_MAP_HEIGHTS);
+        assertEquals(5, controller.getBoardSize());
+    }
 }

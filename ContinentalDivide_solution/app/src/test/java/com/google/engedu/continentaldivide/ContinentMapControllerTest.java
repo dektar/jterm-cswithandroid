@@ -16,6 +16,89 @@
 
 package com.google.engedu.continentaldivide;
 
+import org.junit.Test;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+
 public class ContinentMapControllerTest {
 
+    @Test
+    public void testGetBoardSize() {
+        ContinentMapController controller = new ContinentMapController(new Integer[] {1});
+        assertEquals(1, controller.getBoardSize());
+
+        controller = new ContinentMapController(ContinentMapController.DEFAULT_MAP_HEIGHTS);
+        assertEquals(5, controller.getBoardSize());
+    }
+
+    @Test
+    public void testBuildUpContinentalDivideSimple() {
+        ContinentMapController controller = new ContinentMapController(new Integer[]{1});
+        controller.buildUpContinentalDivide(false);
+        assertTrue(controller.getCell(0, 0).flowsSE);
+        assertTrue(controller.getCell(0, 0).flowsNW);
+        assertFalse(controller.getCell(0, 0).processing);
+    }
+
+    @Test
+    public void testBuildUpContinentalDivideSmall() {
+        // Build the contintental divide just from cell (0, 0). This will determine what flows into
+        // cell (0, 0), and thus into the NW / Green ocean.
+        ContinentMapController controller = new ContinentMapController(new Integer[] {
+                1, 2, 3,
+                2, 3, 2,
+                3, 2, 1
+        });
+        controller.buildUpContinentalDivide(false);
+
+        // Only flow NW
+        assertTrue(controller.getCell(0, 0).flowsNW);
+        assertFalse(controller.getCell(0, 0).flowsSE);
+        assertTrue(controller.getCell(0, 1).flowsNW);
+        assertFalse(controller.getCell(0, 1).flowsSE);
+        assertTrue(controller.getCell(1, 0).flowsNW);
+        assertFalse(controller.getCell(1, 0).flowsSE);
+
+        // Only flow SE
+        assertTrue(controller.getCell(2, 2).flowsSE);
+        assertFalse(controller.getCell(2, 2).flowsNW);
+        assertTrue(controller.getCell(2, 1).flowsSE);
+        assertFalse(controller.getCell(2, 1).flowsNW);
+        assertTrue(controller.getCell(1, 2).flowsSE);
+        assertFalse(controller.getCell(1, 2).flowsNW);
+
+        // Flow both ways
+        assertTrue(controller.getCell(0, 2).flowsNW);
+        assertTrue(controller.getCell(0, 2).flowsSE);
+        assertTrue(controller.getCell(1, 1).flowsNW);
+        assertTrue(controller.getCell(1, 1).flowsSE);
+        assertTrue(controller.getCell(2, 0).flowsNW);
+        assertTrue(controller.getCell(2, 0).flowsSE);
+    }
+
+    @Test
+    public void testBuildUpContientalDivideBasin() {
+        ContinentMapController controller = new ContinentMapController(new Integer[] {
+                1, 2, 3,
+                2, 0, 2,
+                3, 2, 1
+        });
+        controller.buildUpContinentalDivide(false);
+
+        assertTrue(controller.getCell(1, 1).basin);
+        assertFalse(controller.getCell(1, 1).flowsNW);
+        assertFalse(controller.getCell(1, 1).flowsSE);
+
+        // Nothing else is a basin
+        assertFalse(controller.getCell(0, 0).basin);
+        assertFalse(controller.getCell(0, 1).basin);
+        assertFalse(controller.getCell(1, 0).basin);
+        assertFalse(controller.getCell(0, 2).basin);
+        assertFalse(controller.getCell(1, 2).basin);
+        assertFalse(controller.getCell(2, 2).basin);
+        assertFalse(controller.getCell(2, 1).basin);
+        assertFalse(controller.getCell(2, 0).basin);
+    }
 }

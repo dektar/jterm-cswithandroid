@@ -15,13 +15,17 @@
  */
 package com.google.engedu.continentaldivide;
 
+import android.support.annotation.VisibleForTesting;
+
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Random;
 
 public class ContinentMapController {
-    public static final int MAX_HEIGHT = 255;
-    private Integer[] DEFAULT_MAP_HEIGHTS = {
+    private static final int MAX_HEIGHT = 255;
+
+    @VisibleForTesting
+    protected static Integer[] DEFAULT_MAP_HEIGHTS = {
             1, 2, 3, 4, 5,
             2, 3, 4, 5, 6,
             3, 4, 5, 3, 1,
@@ -29,22 +33,40 @@ public class ContinentMapController {
             5, 1, 2, 3, 4,
     };
 
+    @VisibleForTesting
+    protected static Integer[] LAKE_MAP_HEIGHTS = {
+            1, 2, 3, 4, 5,
+            2, 3, 4, 5, 6,
+            3, 4, 0, 0, 1,
+            6, 7, 3, 1, 5,
+            5, 1, 2, 3, 4,
+    };
+
+    @VisibleForTesting
+    protected static Integer[] MAP_EQUAL_NEIGHBORS_HEIGHTS = {
+            50, 50, 50, 50, 60,
+            50, 22, 26, 70, 50,
+            50, 24, 30, 30, 29,
+            50, 28, 28, 29, 22,
+            60, 50, 50, 50, 50,
+    };
+
     // An inner class to store the information we need for each point in the map
-    private class Cell {
+    public class Cell {
         // The height of this spot
-        protected int height = 0;
+        int height = 0;
 
         // Whether this cell flows to the Green Ocean
-        protected boolean flowsNW = false;
+        boolean flowsNW = false;
 
         // Whether this cell flows to the Blue Ocean
-        protected boolean flowsSE = false;
+        boolean flowsSE = false;
 
         // Whether this cell has been determined to flow to neither ocean
-        protected boolean basin = false;
+        boolean basin = false;
 
         // A flag to allow us to track whether the current cell is already being evaluated
-        protected boolean processing = false;
+        boolean processing = false;
     }
 
     private Cell[] map;
@@ -53,20 +75,51 @@ public class ContinentMapController {
     private int maxHeight = 0, minHeight = 0;
 
     public ContinentMapController() {
-        boardSize = (int) (Math.sqrt(DEFAULT_MAP_HEIGHTS.length));
+        this(MAP_EQUAL_NEIGHBORS_HEIGHTS);
+    }
+
+    @VisibleForTesting
+    ContinentMapController(Integer[] mapHeights) {
+        boardSize = (int) (Math.sqrt(mapHeights.length));
         map = new Cell[boardSize * boardSize];
         for (int i = 0; i < boardSize * boardSize; i++) {
             map[i] = new Cell();
-            map[i].height = DEFAULT_MAP_HEIGHTS[i];
+            map[i].height = mapHeights[i];
         }
-        maxHeight = Collections.max(Arrays.asList(DEFAULT_MAP_HEIGHTS));
+        maxHeight = Collections.max(Arrays.asList(mapHeights));
+        minHeight = Collections.min(Arrays.asList(mapHeights));
     }
 
-    private Cell getCell(int x, int y) {
+    /**
+     * Gets the cell at a specific x, y location on the board.
+     */
+    public Cell getCell(int x, int y) {
         if (x >=0 && x < boardSize && y >= 0 && y < boardSize)
             return map[x + boardSize * y];
         else
             return null;
+    }
+
+    /**
+     * Returns the size of the board. The board is always a square, so a 4x4 board
+     * of 16 squares has size 4.
+     */
+    public int getBoardSize() {
+        return boardSize;
+    }
+
+    /**
+     * Gets the max height of the current board.
+     */
+    public int getMaxHeight() {
+        return maxHeight;
+    }
+
+    /**
+     * Gets the minimum height of the current board.
+     */
+    public int getMinHeight() {
+        return minHeight;
     }
 
     /**
@@ -83,6 +136,8 @@ public class ContinentMapController {
 
     /**
      * Labels each cell's continental divide status by starting from the coasts and working uphill.
+     * This calls buildUpContinentalDivideRecursively on each edge cell that has not yet been
+     * processed.
      * @param oneStep Note that this method takes a oneStep parameter which allows you to build the
      *                solution incrementally. This will be handy in debugging your own solution.
      */
@@ -109,15 +164,49 @@ public class ContinentMapController {
     }
 
     /**
-     * Helper for the above buildUpContinentalDivide.
+     * Helper for the above buildUpContinentalDivide, which builds it up for just one cell.
+     * @param flowsNW Whether the neighbor before this cell flows NW
+     * @param flowsSE Whether the neighbor before this cell flows SE
+     * @param previousHeight The height of the neighbor before this cell
      */
     private void buildUpContinentalDivideRecursively(
             int x, int y, boolean flowsNW, boolean flowsSE, int previousHeight) {
-        /**
-         **
-         **  YOUR CODE GOES HERE
-         **
-         **/
+        // EXAMPLE SOLUTION
+
+        // Check we are on the board
+        if (x < 0 || x >= boardSize || y < 0 || y >= boardSize) {
+            return;
+        }
+
+        Cell cell = getCell(x, y);
+        // Check we are at least higher than our neighbor
+        if (previousHeight > cell.height) {
+            // This may be a basin if it doesn't flow anywhere yet.
+            cell.basin = !cell.flowsNW && !cell.flowsSE;
+            return;
+        }
+
+        // Check we are not already working on this cell
+        if (cell.processing) {
+            return;
+        }
+
+        // Now do the recursive work on this cell's neighbors
+        cell.processing = true;
+
+        // This cell will flow the same direction as its neighbor / parent, because it is taller
+        // than its neighbor / parent, and abutts it.
+        cell.flowsNW = cell.flowsNW || flowsNW;
+        cell.flowsSE = cell.flowsSE || flowsSE;
+        cell.basin = false;
+        buildUpContinentalDivideRecursively(x - 1, y, cell.flowsNW, cell.flowsSE, cell.height);
+        buildUpContinentalDivideRecursively(x + 1, y, cell.flowsNW, cell.flowsSE, cell.height);
+        buildUpContinentalDivideRecursively(x, y - 1, cell.flowsNW, cell.flowsSE, cell.height);
+        buildUpContinentalDivideRecursively(x, y + 1, cell.flowsNW, cell.flowsSE, cell.height);
+
+        cell.processing = false;
+
+        // END EXAMPLE SOLUTION
     }
 
     /**
