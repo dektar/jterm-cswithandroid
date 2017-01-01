@@ -43,7 +43,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public boolean onFindContinentalDivideDown(View view) {
-        continentMap.buildDownContinentalDivide(true);
+        continentMap.buildDownContinentalDivide(false);
         return true;
     }
 

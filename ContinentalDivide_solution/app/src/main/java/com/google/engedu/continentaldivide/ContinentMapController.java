@@ -244,13 +244,41 @@ public class ContinentMapController {
      * Helper for the above buildUpContinentalDivide.
      */
     private Cell buildDownContinentalDivideRecursively(int x, int y, int previousHeight) {
-        Cell workingCell = new Cell();
-        /**
-         **
-         **  YOUR CODE GOES HERE
-         **
-         **/
-        return workingCell;
+        // EXAMPLE SOLUTION
+        // If we are off the board.
+        if (x < 0 || y < 0 || x >= boardSize || y >= boardSize) {
+            Cell workingCell = new Cell();
+            if (x < 0 || y < 0) {
+                workingCell.flowsNW = true;
+            }
+            if (x >= boardSize || y >= boardSize) {
+                workingCell.flowsSE = true;
+            }
+            return workingCell;
+        }
+
+        Cell cell = getCell(x, y);
+        if (cell.processing || cell.height > previousHeight) {
+            // Return something blank so as not to mess up the processing results.
+            // Also, if the height of the current cell is taller than the previous one, skip this.
+            // Instead of returning a "null" cell, a new blank cell will suffice because of OR logic
+            return new Cell();
+        }
+        cell.processing = true;
+        Cell north = buildDownContinentalDivideRecursively(x - 1, y, cell.height);
+        Cell south = buildDownContinentalDivideRecursively(x + 1, y, cell.height);
+        Cell west = buildDownContinentalDivideRecursively(x, y - 1, cell.height);
+        Cell east = buildDownContinentalDivideRecursively(x, y + 1, cell.height);
+        cell.flowsNW = cell.flowsNW || north.flowsNW || south.flowsNW || east.flowsNW || west.flowsNW;
+        cell.flowsSE = cell.flowsSE || north.flowsSE || south.flowsSE || east.flowsSE || west.flowsSE;
+        if (!cell.flowsNW && !cell.flowsSE) {
+            cell.basin = true;
+        } else {
+            cell.basin = false;
+        }
+        cell.processing = false;
+        return cell;
+        // END EXAMPLE SOLUTION
     }
 
     /**
