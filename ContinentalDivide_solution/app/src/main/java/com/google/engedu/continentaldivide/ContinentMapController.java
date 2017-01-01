@@ -241,7 +241,9 @@ public class ContinentMapController {
     }
 
     /**
-     * Helper for the above buildUpContinentalDivide.
+     * Helper for the above buildDownContinentalDivide, which builds down the continental divide
+     * starting at a single cell. This calculates the cell at the X and Y position given recursively
+     * @param previousHeight The height of the previous neighbor who called this function.
      */
     private Cell buildDownContinentalDivideRecursively(int x, int y, int previousHeight) {
         // EXAMPLE SOLUTION

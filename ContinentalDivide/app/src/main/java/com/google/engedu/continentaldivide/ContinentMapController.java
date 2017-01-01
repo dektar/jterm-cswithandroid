@@ -161,7 +161,10 @@ public class ContinentMapController {
     }
 
     /**
-     * Helper for the above buildUpContinentalDivide.
+     * Helper for the above buildUpContinentalDivide, which builds it up for just one cell.
+     * @param flowsNW Whether the neighbor before this cell flows NW
+     * @param flowsSE Whether the neighbor before this cell flows SE
+     * @param previousHeight The height of the neighbor before this cell
      */
     private void buildUpContinentalDivideRecursively(
             int x, int y, boolean flowsNW, boolean flowsSE, int previousHeight) {
@@ -204,7 +207,9 @@ public class ContinentMapController {
     }
 
     /**
-     * Helper for the above buildUpContinentalDivide.
+     * Helper for the above buildDownContinentalDivide, which builds down the continental divide
+     * starting at a single cell. This calculates the cell at the X and Y position given recursively
+     * @param previousHeight The height of the previous neighbor who called this function.
      */
     private Cell buildDownContinentalDivideRecursively(int x, int y, int previousHeight) {
         Cell workingCell = new Cell();
