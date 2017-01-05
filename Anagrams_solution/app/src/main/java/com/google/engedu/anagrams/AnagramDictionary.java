@@ -133,6 +133,9 @@ public class AnagramDictionary {
         return result;
     }
 
+    /**
+     * Gets all the words that are anagrams of word but have at least one more letter than word.
+     */
     public ArrayList<String> getAnagramsWithOneMoreLetter(String word) {
         ArrayList<String> result = new ArrayList<String>();
         for (char c = 'a'; c <= 'z'; c++) {
@@ -144,6 +147,9 @@ public class AnagramDictionary {
         return result;
     }
 
+    /**
+     * Picks a starter word with at least MIN_NUM_ANAGRAMS anagrams.
+     */
     public String pickGoodStarterWord() {
         Object[] keys = lettersToWord.keySet().toArray();
         String next = (String) keys[random.nextInt(keys.length)];
