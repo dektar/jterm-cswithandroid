@@ -16,7 +16,7 @@
 package com.google.engedu.ghost;
 
 /**
- * Created by apicard on 9/16/15.
+ * A dictionary interface for the Ghost game.
  */
 public interface GhostDictionary {
     public final static int MIN_WORD_LENGTH = 4;

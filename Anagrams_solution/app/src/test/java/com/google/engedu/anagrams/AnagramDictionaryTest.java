@@ -16,11 +16,18 @@
 
 package com.google.engedu.anagrams;
 
+import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.runners.MockitoJUnitRunner;
+import org.powermock.api.mockito.PowerMockito;
+import org.powermock.core.classloader.annotations.PrepareForTest;
+import org.powermock.modules.junit4.PowerMockRunner;
 
 import static org.junit.Assert.*;
 
 import android.text.TextUtils;
+import android.util.Log;
 
 import java.io.InputStream;
 import java.util.List;
@@ -30,8 +37,15 @@ import java.util.List;
  * Tests for AnagramDictionary
  */
 
+@RunWith(PowerMockRunner.class)
+@PrepareForTest({Log.class})
 public class AnagramDictionaryTest {
     String[] words = {"act", "cat", "dog", "pot", "pots", "spots", "stop", "stops"};
+
+    @Before
+    public void beforeEach() {
+        PowerMockito.mockStatic(Log.class);
+    }
 
     @Test
     public void testSortLetters() {
