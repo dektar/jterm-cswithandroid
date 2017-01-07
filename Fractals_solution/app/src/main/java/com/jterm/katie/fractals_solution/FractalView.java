@@ -18,15 +18,20 @@ package com.jterm.katie.fractals_solution;
 import android.annotation.TargetApi;
 import android.content.Context;
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.Paint;
 import android.os.Build;
 import android.util.AttributeSet;
 import android.view.View;
 
+import java.util.Random;
+
 public class FractalView extends View {
     private Paint mBackgroundPaint;
     private Paint mPaint;
+    private Paint mLeafPaint;
     private int mMaxDepth = -1;
+    private Random mRandom;
 
     public FractalView(Context context) {
         super(context);
@@ -52,7 +57,15 @@ public class FractalView extends View {
     private void init() {
         mBackgroundPaint = new Paint();
         mBackgroundPaint.setColor(getResources().getColor(R.color.background_color));
+
         mPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+        mPaint.setColor(Color.rgb(66, 126, 17));
+        mPaint.setStrokeWidth(5);
+
+        mLeafPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+        mLeafPaint.setColor(Color.argb(75, 200, 200, 30));
+
+        mRandom = new Random();
     }
 
     @Override
@@ -75,6 +88,48 @@ public class FractalView extends View {
         if (mMaxDepth < 0) {
             return;
         }
+        // Start the tree in the middle of the bottom of the screen, with angle 0 (straight up).
+        drawFractalTree(canvas, getWidth() / 2, getHeight(), 1.5 * Math.PI, 0);
+    }
 
+    /**
+     *
+     * @param canvas The canvas to use for drawing
+     * @param x The X position of the base of this tree
+     * @param y The Y position of the base of this tree
+     * @param angle The angle to sprout from the base of this tree
+     * @param depth The depth the tree should be.
+     */
+    private void drawFractalTree(Canvas canvas, float x, float y, double angle, int depth) {
+        // Base case
+        if (depth >= mMaxDepth) {
+            canvas.drawCircle(x, y, getWidth() / 50, mLeafPaint);
+            return;
+        }
+
+        float branchLength = getBranchLength(depth);
+        mPaint.setStrokeWidth(getBranchWidth(depth));
+        // Setting the color would be pretty cool.
+
+        // Use sin and cos to find the end point of this branch.
+        float xNew = (float) (x + Math.cos(angle) * branchLength);
+        float yNew = (float) (y + Math.sin(angle) * branchLength);
+
+        canvas.drawLine(x, y, xNew, yNew, mPaint);
+
+        // Draw two branches recursively
+        double angleNewFirst = angle - mRandom.nextInt(10) / 20.0;
+        double angleNewSecond = angle + mRandom.nextInt(10) / 20.0;
+        drawFractalTree(canvas, xNew, yNew, angleNewFirst, depth + 1);
+        drawFractalTree(canvas, xNew, yNew, angleNewSecond, depth + 1);
+    }
+
+    private float getBranchLength(int depth) {
+        return getWidth() / 6 * (mMaxDepth - depth) * 1.0f / mMaxDepth;
+    }
+
+    private float getBranchWidth(int depth) {
+        // A non-linear scale would be nice here.
+        return 30 * (mMaxDepth - depth) * 1.0f / mMaxDepth;
     }
 }
