@@ -23,6 +23,8 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.os.Build;
 import android.util.AttributeSet;
+import android.view.GestureDetector;
+import android.view.MotionEvent;
 import android.view.View;
 
 public class MandelbrotView extends View {
@@ -40,7 +42,7 @@ public class MandelbrotView extends View {
     private Paint mBackgroundPaint;
     private Paint mPaint;
     private int mMaxDepth;
-    private int mNumPoints = 200;
+    private int mNumPoints = 100;
 
     private int[] mColors;
 
