@@ -71,7 +71,7 @@ public class MandelbrotView extends View {
         mBackgroundPaint = new Paint();
         mBackgroundPaint.setColor(getResources().getColor(R.color.background_color));
 
-        mPaint = new Paint();
+        mPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
     }
 
     @Override
@@ -90,7 +90,7 @@ public class MandelbrotView extends View {
         mYMin = Y_MIN;
         mYMax = Y_MAX;
         initializeColors();
-        invalidate();
+        postInvalidate();
     }
 
     /**
