@@ -15,5 +15,7 @@
     <color name="colorPrimary">#3F51B5</color>
     <color name="colorPrimaryDark">#303F9F</color>
     <color name="colorAccent">#FF4081</color>
-    <color name="background_color">#EEEEEE</color>
+    <color name="background_color">#fcf6ed</color>
+    <color name="leaf_color">#50f7c5df</color>
+    <color name="branch_color">#423528</color>
 </resources>

@@ -59,11 +59,11 @@ public class FractalView extends View {
         mBackgroundPaint.setColor(getResources().getColor(R.color.background_color));
 
         mPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-        mPaint.setColor(Color.rgb(66, 126, 17));
-        mPaint.setStrokeWidth(5);
+        mPaint.setColor(getResources().getColor(R.color.branch_color));
+        mPaint.setStrokeCap(Paint.Cap.ROUND);
 
         mLeafPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-        mLeafPaint.setColor(Color.argb(75, 200, 200, 30));
+        mLeafPaint.setColor(getResources().getColor(R.color.leaf_color));
 
         mRandom = new Random();
     }
@@ -125,11 +125,15 @@ public class FractalView extends View {
     }
 
     private float getBranchLength(int depth) {
-        return getWidth() / 6 * (mMaxDepth - depth) * 1.0f / mMaxDepth;
+        // Add some randomness to the length
+        float baseLength = getWidth() / 6 * (1 - mRandom.nextInt(10) / 30.0f);
+
+        // Scale it based on the depth
+        return baseLength * (mMaxDepth - depth) * 1.0f / mMaxDepth;
     }
 
     private float getBranchWidth(int depth) {
-        // A non-linear scale would be nice here.
-        return 30 * (mMaxDepth - depth) * 1.0f / mMaxDepth;
+        // A non-linear scale would be nice here, to get much thinner trunks and thicker branches
+        return (float) (30 * Math.pow((mMaxDepth - depth), 2) / (mMaxDepth * mMaxDepth));
     }
 }
