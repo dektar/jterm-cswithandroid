@@ -55,7 +55,7 @@ public class FastDictionaryTest {
 
         // Check some substrings
         assertEquals("catfishes", dict.getAnyWordStartingWith("catfishe"));
-        assertEquals("catfishes", dict.getAnyWordStartingWith("catfishes"));
+        assertEquals(null, dict.getAnyWordStartingWith("catfishes"));
         assertTrue(dict.getAnyWordStartingWith("cat").startsWith("cat"));
 
         // Check last word in the dict

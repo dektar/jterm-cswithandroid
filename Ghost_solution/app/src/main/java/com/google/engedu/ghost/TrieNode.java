@@ -79,18 +79,19 @@ public class TrieNode {
         }
         if (s.length() == 0) {
             if (children.size() == 0 && isWord) {
-                // We are a leaf node and a word!
-                return "";
+                // We are a leaf node and a word -- so we have no children!
+                return null;
+            } else {
+                if (children.size() > 0) {
+                    // Pick any next character and return that word
+                    String nextChar = pickRandomChildChar();
+                    String nextSuffix = children.get(nextChar).getAnyWordStartingWith(null);
+                    return nextChar + nextSuffix;
+                }
+                // Otherwise we are a leaf node -- we have no children. Return null; we couldn't make
+                // a valid word.
+                return null;
             }
-            if (children.size() > (children.containsKey("") ? 1 : 0)) {
-                // Pick any next character and return that word
-                String nextChar = pickRandomChildChar();
-                String nextSuffix = children.get(nextChar).getAnyWordStartingWith(null);
-                return nextChar + nextSuffix;
-            }
-            // Otherwise we are a leaf node -- we have no children. Return null; we couldn't make
-            // a valid word.
-            return null;
         }
         String firstChar = s.substring(0, 1);
         if (children.containsKey(firstChar)) {
