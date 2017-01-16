@@ -22,6 +22,7 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.os.Build;
 import android.util.AttributeSet;
+import android.view.MotionEvent;
 import android.view.View;
 
 import java.util.Random;
@@ -66,6 +67,16 @@ public class FractalView extends View {
         mLeafPaint.setColor(getResources().getColor(R.color.leaf_color));
 
         mRandom = new Random();
+
+        setOnTouchListener(new OnTouchListener() {
+            @Override
+            public boolean onTouch(View view, MotionEvent motionEvent) {
+                myCurrentX = motionEvent.getX();
+                motionEvent.getY();
+                motionEvent.getActionMasked();
+                return false;
+            }
+        });
     }
 
     @Override
@@ -88,8 +99,8 @@ public class FractalView extends View {
         if (mMaxDepth < 0) {
             return;
         }
-        // Start the tree in the middle of the bottom of the screen, with angle 0 (straight up).
-        drawFractalTree(canvas, getWidth() / 2, getHeight(), 1.5 * Math.PI, 0);
+        // Start the tree in the middle of the bottom of the screen, with angle PI (straight up).
+        drawFractalTree(canvas, getWidth() / 2, getHeight(), Math.PI, 0);
     }
 
     /**
@@ -112,8 +123,8 @@ public class FractalView extends View {
         // Setting the color would be pretty cool.
 
         // Use sin and cos to find the end point of this branch.
-        float xNew = (float) (x + Math.cos(angle) * branchLength);
-        float yNew = (float) (y + Math.sin(angle) * branchLength);
+        float xNew = (float) (x + Math.sin(angle) * branchLength);
+        float yNew = (float) (y + Math.cos(angle) * branchLength);
 
         canvas.drawLine(x, y, xNew, yNew, mPaint);
 
