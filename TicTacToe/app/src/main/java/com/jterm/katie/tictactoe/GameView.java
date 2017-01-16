@@ -1,15 +1,3 @@
-package com.jterm.katie.tictactoe;
-
-import android.annotation.TargetApi;
-import android.content.Context;
-import android.graphics.Canvas;
-import android.graphics.Color;
-import android.graphics.Paint;
-import android.os.Build;
-import android.util.AttributeSet;
-import android.view.MotionEvent;
-import android.view.View;
-
 /*
  *  Copyright 2016 Google Inc. All Rights Reserved.
  *
@@ -25,7 +13,23 @@ import android.view.View;
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
+
+package com.jterm.katie.tictactoe;
+
+import android.annotation.TargetApi;
+import android.content.Context;
+import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.Paint;
+import android.os.Build;
+import android.util.AttributeSet;
+import android.util.Log;
+import android.view.MotionEvent;
+import android.view.View;
+
 public class GameView extends View {
+    private static final String TAG = "GameView";
+
     public interface CellTouchListener {
         void onCellTouched(int x, int y);
     }
@@ -71,7 +75,10 @@ public class GameView extends View {
         setOnTouchListener(new OnTouchListener() {
             @Override
             public boolean onTouch(View view, MotionEvent motionEvent) {
-                if (motionEvent.getActionMasked() == MotionEvent.ACTION_UP) {
+                Log.d(TAG, "touch event!");
+                if (motionEvent.getActionMasked() == MotionEvent.ACTION_DOWN) {
+                    return true;
+                } else if (motionEvent.getActionMasked() == MotionEvent.ACTION_UP) {
                     if (mTouchListener != null) {
                         int cellSize = getWidth() / 3;
                         int x = (int) (motionEvent.getX() / cellSize);
@@ -96,6 +103,10 @@ public class GameView extends View {
     public void updateGame(Game game) {
         mGame = game;
         postInvalidate();
+    }
+
+    public Game getGame() {
+        return mGame;
     }
 
     @Override

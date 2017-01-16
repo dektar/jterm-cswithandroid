@@ -2,4 +2,8 @@
     <string name="app_name">TicTacToe</string>
     <string name="sign_in">Sign in</string>
     <string name="sign_out">sign out</string>
+    <string name="error_not_your_turn">It isn\'t your turn!</string>
+    <string name="error_spot_taken">Error: This cell is already taken</string>
+    <string name="error_game_over">Error: game is already over</string>
+    <string name="game_over">Game Over!</string>
 </resources>

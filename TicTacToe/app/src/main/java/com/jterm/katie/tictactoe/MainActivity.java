@@ -41,6 +41,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
     private GoogleApiClient mGoogleApiClient;
     private GameView mGameView;
     private DatabaseReference mUserDb;
+    private DatabaseReference mGameDatabaseReference;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -51,8 +52,8 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
         mGameView.setCellTouchListener(new GameView.CellTouchListener() {
             @Override
             public void onCellTouched(int x, int y) {
-                Log.d(TAG, "Cell touched at x :" + x + "and y: " + y);
-                //processCellTouch(x, y);
+                Log.d(TAG, "Cell touched at x:" + x + " and y:" + y);
+                processCellTouch(x, y);
             }
         });
 
@@ -68,6 +69,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
             finish();
             return;
         } else {
+            // TODO: The user could pick a username if they don't have one already?
             mUsername = mFirebaseUser.getEmail().split("@")[0];
             if (mFirebaseUser.getPhotoUrl() != null) {
                 mPhotoUrl = mFirebaseUser.getPhotoUrl().toString();
@@ -84,6 +86,8 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
         if (!TextUtils.equals(mUsername, ANONYMOUS)) {
             mUserDb = mFirebaseDatabaseReference.child("users").child(mUsername);
         }
+        // TODO: Pick the game better.
+        mGameDatabaseReference = mFirebaseDatabaseReference.child("games").child("-BCDEFGH");
     }
 
     @Override
@@ -110,8 +114,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
             }
         });
 
-        mFirebaseDatabaseReference.child("games").child("-ABCDEFG")
-                .addValueEventListener(new ValueEventListener() {
+        mGameDatabaseReference.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 Log.d(TAG, dataSnapshot.toString());
@@ -165,5 +168,38 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
         // be available.
         Log.d(TAG, "onConnectionFailed:" + connectionResult);
         Toast.makeText(this, "Google Play Services error.", Toast.LENGTH_SHORT).show();
+    }
+
+    private void processCellTouch(int x, int y) {
+        if (mGameView.getGame().getResult() != Game.NO_PLAYER) {
+            Toast.makeText(this, getResources().getString(R.string.error_game_over),
+                    Toast.LENGTH_SHORT).show();
+            return;
+        }
+        if (!mGameView.getGame().isUserTurn(mUsername)) {
+            Toast.makeText(this, getResources().getString(R.string.error_not_your_turn),
+                    Toast.LENGTH_SHORT).show();
+            return;
+        }
+        if (mGameView.getGame().getBoard().get(x).get(y) != Game.NO_PLAYER) {
+            Toast.makeText(this, getResources().getString(R.string.error_spot_taken),
+                    Toast.LENGTH_SHORT).show();
+            return;
+        }
+        mGameView.getGame().doTurn(x, y, mUsername);
+        if (mGameView.getGame().getTurn() == Game.NO_PLAYER) {
+            // Then the game is over.
+            // TODO: Display a message or something about who won
+            Toast.makeText(this, getResources().getString(R.string.game_over),
+                    Toast.LENGTH_SHORT).show();
+        } else {
+            // TODO: Display a message that we are waiting for the other player to go... or update
+            // the views to show that
+        }
+        // Update the view in real-time to avoid lag
+        mGameView.updateGame(mGameView.getGame());
+
+        // Update the game in the Firebase database
+        mGameDatabaseReference.setValue(mGameView.getGame());
     }
 }
