@@ -4,10 +4,12 @@ import android.content.Intent;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.firebase.ui.database.FirebaseRecyclerAdapter;
@@ -24,6 +26,8 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.remoteconfig.FirebaseRemoteConfig;
 
+import org.w3c.dom.Text;
+
 public class MainActivity extends AppCompatActivity implements GoogleApiClient.OnConnectionFailedListener {
     private static final String TAG = "MainActivity";
     public static final String ANONYMOUS = "anonymous";
@@ -36,6 +40,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
     private DatabaseReference mFirebaseDatabaseReference;
     private GoogleApiClient mGoogleApiClient;
     private GameView mGameView;
+    private DatabaseReference mUserDb;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -63,7 +68,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
             finish();
             return;
         } else {
-            mUsername = mFirebaseUser.getDisplayName();
+            mUsername = mFirebaseUser.getEmail().split("@")[0];
             if (mFirebaseUser.getPhotoUrl() != null) {
                 mPhotoUrl = mFirebaseUser.getPhotoUrl().toString();
             }
@@ -76,11 +81,34 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
                 .build();
 
         mFirebaseDatabaseReference = FirebaseDatabase.getInstance().getReference();
+        if (!TextUtils.equals(mUsername, ANONYMOUS)) {
+            mUserDb = mFirebaseDatabaseReference.child("users").child(mUsername);
+        }
     }
 
     @Override
     protected void onStart() {
         super.onStart();
+
+        // TODO: Update this DB on a win.
+        mUserDb.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                User user = dataSnapshot.getValue(User.class);
+                if (user == null) {
+                    // We need to add one!
+                    mUserDb.setValue(new User(mUsername, mFirebaseAuth.getCurrentUser().getEmail()));
+                } else {
+                    ((TextView) findViewById(R.id.username)).setText(user.getUsername() + " (" +
+                            user.getWins() + " wins)");
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
 
         mFirebaseDatabaseReference.child("games").child("-ABCDEFG")
                 .addValueEventListener(new ValueEventListener() {
