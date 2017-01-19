@@ -22,15 +22,39 @@
     android:paddingTop="@dimen/activity_vertical_margin"
     tools:context="com.jterm.katie.tictactoe.MainActivity">
 
-    <TextView
-        android:layout_width="wrap_content"
+    <LinearLayout
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:id="@+id/username" />
+        android:orientation="vertical"
+        android:id="@+id/status_section"
+        >
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/username"
+            android:textSize="18sp"
+            />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/opponent_info"
+            android:textSize="14sp"
+            />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/status"
+            android:textSize="14sp"
+            />
+    </LinearLayout>
 
     <com.jterm.katie.tictactoe.GameView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_below="@id/username"
         android:id="@+id/board"
+        android:layout_below="@id/status_section"
         />
 </RelativeLayout>

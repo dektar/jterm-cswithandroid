@@ -12,7 +12,6 @@ import android.view.MenuItem;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.firebase.ui.database.FirebaseRecyclerAdapter;
 import com.google.android.gms.appinvite.AppInvite;
 import com.google.android.gms.auth.api.Auth;
 import com.google.android.gms.common.ConnectionResult;
@@ -24,9 +23,6 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
-import com.google.firebase.remoteconfig.FirebaseRemoteConfig;
-
-import org.w3c.dom.Text;
 
 public class MainActivity extends AppCompatActivity implements GoogleApiClient.OnConnectionFailedListener {
     private static final String TAG = "MainActivity";
@@ -40,8 +36,9 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
     private DatabaseReference mFirebaseDatabaseReference;
     private GoogleApiClient mGoogleApiClient;
     private GameView mGameView;
-    private DatabaseReference mUserDb;
+    private DatabaseReference mUserDatabaseReference;
     private DatabaseReference mGameDatabaseReference;
+    private User mUser;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -84,7 +81,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
 
         mFirebaseDatabaseReference = FirebaseDatabase.getInstance().getReference();
         if (!TextUtils.equals(mUsername, ANONYMOUS)) {
-            mUserDb = mFirebaseDatabaseReference.child("users").child(mUsername);
+            mUserDatabaseReference = mFirebaseDatabaseReference.child("users").child(mUsername);
         }
         // TODO: Pick the game better.
         mGameDatabaseReference = mFirebaseDatabaseReference.child("games").child("-BCDEFGH");
@@ -95,17 +92,19 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
         super.onStart();
 
         // TODO: Update this DB on a win.
-        mUserDb.addValueEventListener(new ValueEventListener() {
+        mUserDatabaseReference.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 User user = dataSnapshot.getValue(User.class);
                 if (user == null) {
                     // We need to add one!
-                    mUserDb.setValue(new User(mUsername, mFirebaseAuth.getCurrentUser().getEmail()));
+                    mUserDatabaseReference.setValue(new User(mUsername,
+                            mFirebaseAuth.getCurrentUser().getEmail()));
                 } else {
                     ((TextView) findViewById(R.id.username)).setText(user.getUsername() + " (" +
                             user.getWins() + " wins)");
                 }
+                mUser = user;
             }
 
             @Override
@@ -116,11 +115,24 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
 
         mGameDatabaseReference.addValueEventListener(new ValueEventListener() {
             @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                Log.d(TAG, dataSnapshot.toString());
+            public void onDataChange(DataSnapshot dataSnapshot) {Log.d(TAG, dataSnapshot.toString());
                 Game g1 = dataSnapshot.getValue(Game.class);
                 mGameView.updateGame(g1);
-                Log.d(TAG, "now what?");
+                if (mGameView.getGame().getTurn() == Game.NO_PLAYER) {
+                    doEndGameUi();
+                } else if (mGameView.getGame().isUserTurn(mUsername)) {
+                    ((TextView) findViewById(R.id.status)).setText(getResources().getString(
+                            R.string.your_turn));
+                } else {
+                    ((TextView) findViewById(R.id.status)).setText(getResources().getString(
+                            R.string.waiting_for_player));
+                }
+                String opponentName =
+                        TextUtils.equals(mGameView.getGame().getUsername_p1(), mUsername) ?
+                                mGameView.getGame().getUsername_p2() :
+                                mGameView.getGame().getUsername_p1();
+                ((TextView) findViewById(R.id.opponent_info)).setText(String.format(
+                        getResources().getString(R.string.opponent), opponentName));
             }
 
             @Override
@@ -188,18 +200,39 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
         }
         mGameView.getGame().doTurn(x, y, mUsername);
         if (mGameView.getGame().getTurn() == Game.NO_PLAYER) {
-            // Then the game is over.
-            // TODO: Display a message or something about who won
-            Toast.makeText(this, getResources().getString(R.string.game_over),
-                    Toast.LENGTH_SHORT).show();
+            if (TextUtils.equals(mGameView.getGame().getWinner(), mUsername)) {
+                mUser.setWins(mUser.getWins() + 1);
+                mUserDatabaseReference.setValue(mUser);
+            }
+            doEndGameUi();
         } else {
-            // TODO: Display a message that we are waiting for the other player to go... or update
-            // the views to show that
+            ((TextView) findViewById(R.id.status)).setText(getResources().getString(
+                    R.string.waiting_for_player));
         }
         // Update the view in real-time to avoid lag
         mGameView.updateGame(mGameView.getGame());
 
         // Update the game in the Firebase database
         mGameDatabaseReference.setValue(mGameView.getGame());
+    }
+
+    private void doEndGameUi() {
+        // Then the game is over.
+        // Display a message about who won
+        if (TextUtils.equals(mGameView.getGame().getWinner(), mUsername)) {
+            ((TextView) findViewById(R.id.status)).setText(getResources().getString(
+                    R.string.you_win));
+        } else if (mGameView.getGame().getResult() == Game.NO_PLAYER) {
+            ((TextView) findViewById(R.id.status)).setText(getResources().getString(
+                    R.string.cats_game));
+        } else {
+            ((TextView) findViewById(R.id.status)).setText(getResources().getString(
+                    R.string.you_lose));
+        }
+        Toast.makeText(this, getResources().getString(R.string.game_over),
+                Toast.LENGTH_SHORT).show();
+
+        // Show a new game button!
+        
     }
 }

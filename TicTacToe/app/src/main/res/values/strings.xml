@@ -6,4 +6,10 @@
     <string name="error_spot_taken">Error: This cell is already taken</string>
     <string name="error_game_over">Error: game is already over</string>
     <string name="game_over">Game Over!</string>
+    <string name="waiting_for_player">Waiting for the other player...</string>
+    <string name="you_win">You win!</string>
+    <string name="cats_game">Cat\'s game! No one wins.</string>
+    <string name="your_turn">Your turn!!</string>
+    <string name="you_lose">Game over, you\'ve lost.</string>
+    <string name="opponent">Playing against: %s</string>
 </resources>

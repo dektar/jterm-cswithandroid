@@ -30,6 +30,7 @@ import static java.lang.annotation.RetentionPolicy.SOURCE;
  * Represents a tic tac toe game
  */
 public class Game {
+
     @Retention(SOURCE)
     @IntDef({NO_PLAYER, FIRST_PLAYER, SECOND_PLAYER})
     public @interface PlayerId{}
@@ -182,6 +183,16 @@ public class Game {
             // No spots left, the game is over.
             setResult(Game.NO_PLAYER);
             return true;
+        }
+    }
+
+    public String getWinner() {
+        if (getResult() == NO_PLAYER) {
+            return "";
+        } else if (getResult() == FIRST_PLAYER) {
+            return username_p1;
+        } else {
+            return username_p2;
         }
     }
 }
