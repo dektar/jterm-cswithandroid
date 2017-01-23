@@ -9,6 +9,7 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -23,6 +24,9 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class MainActivity extends AppCompatActivity implements GoogleApiClient.OnConnectionFailedListener {
     private static final String TAG = "MainActivity";
@@ -39,6 +43,8 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
     private DatabaseReference mUserDatabaseReference;
     private DatabaseReference mGameDatabaseReference;
     private User mUser;
+    private ValueEventListener mGameEventListener;
+    private ValueEventListener mUserEventListener;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -54,7 +60,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
             }
         });
 
-        // Set default username is anonymous.
+        // Set default username to anonymous.
         mUsername = ANONYMOUS;
 
         // Initialize Firebase Auth
@@ -68,6 +74,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
         } else {
             // TODO: The user could pick a username if they don't have one already?
             mUsername = mFirebaseUser.getEmail().split("@")[0];
+            mUsername = mUsername.replace(".", "");
             if (mFirebaseUser.getPhotoUrl() != null) {
                 mPhotoUrl = mFirebaseUser.getPhotoUrl().toString();
             }
@@ -81,39 +88,36 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
 
         mFirebaseDatabaseReference = FirebaseDatabase.getInstance().getReference();
         if (!TextUtils.equals(mUsername, ANONYMOUS)) {
+            // TODO: This doesn't work if we haven't added the user to the database yet!
             mUserDatabaseReference = mFirebaseDatabaseReference.child("users").child(mUsername);
         }
-        // TODO: Pick the game better.
-        mGameDatabaseReference = mFirebaseDatabaseReference.child("games").child("-BCDEFGH");
-    }
 
-    @Override
-    protected void onStart() {
-        super.onStart();
-
-        // TODO: Update this DB on a win.
-        mUserDatabaseReference.addValueEventListener(new ValueEventListener() {
+        mUserEventListener = new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 User user = dataSnapshot.getValue(User.class);
+                mUser = user;
                 if (user == null) {
                     // We need to add one!
                     mUserDatabaseReference.setValue(new User(mUsername,
                             mFirebaseAuth.getCurrentUser().getEmail()));
+                    // TODO: Need to show an option to start a new game for this new user
                 } else {
                     ((TextView) findViewById(R.id.username)).setText(user.getUsername() + " (" +
                             user.getWins() + " wins)");
+                    if (mGameDatabaseReference == null) {
+                        initializeGameDatabaseReference(mUser.getGames());
+                    }
                 }
-                mUser = user;
             }
 
             @Override
             public void onCancelled(DatabaseError databaseError) {
 
             }
-        });
+        };
 
-        mGameDatabaseReference.addValueEventListener(new ValueEventListener() {
+        mGameEventListener = new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {Log.d(TAG, dataSnapshot.toString());
                 Game g1 = dataSnapshot.getValue(Game.class);
@@ -139,12 +143,58 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
             public void onCancelled(DatabaseError databaseError) {
                 Log.d(TAG, "Database error: " + databaseError.getMessage());
             }
+        };
+
+        findViewById(R.id.newGameBn).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                // TODO: How to keep two users from joining different new games?
+                Game newGame = new Game(mUsername);
+                String key = mFirebaseDatabaseReference.child("games").push().getKey();
+                mFirebaseDatabaseReference.child("games").child(key).setValue(newGame);
+
+                if (mUser.getGames() != null) {
+                    mUser.getGames().add(key);
+                } else {
+                    ArrayList<String> games = new ArrayList<>();
+                    games.add(key);
+                    mUser.setGames(games);
+                }
+                // TODO: Add the game to the other user too
+                mUserDatabaseReference.setValue(mUser);
+
+                // Update the referenced game
+                initializeGameDatabaseReference(mUser.getGames());
+            }
         });
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        mUserDatabaseReference.addValueEventListener(mUserEventListener);
+    }
+
+    private void initializeGameDatabaseReference(List<String> games) {
+        if (games == null || games.size() == 0) {
+            // TODO start new game option
+            return;
+        }
+        // Maybe pick the last game in the user's game list?
+        mGameDatabaseReference = mFirebaseDatabaseReference.child("games").child(
+                games.get(games.size() - 1));
+        mGameDatabaseReference.addValueEventListener(mGameEventListener);
     }
 
     @Override
     protected void onStop() {
         // TODO: remove event listener
+        if (mUserDatabaseReference != null) {
+            mUserDatabaseReference.removeEventListener(mUserEventListener);
+        }
+        if (mGameDatabaseReference != null) {
+            mGameDatabaseReference.removeEventListener(mGameEventListener);
+        }
         super.onStop();
     }
 
@@ -233,6 +283,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
                 Toast.LENGTH_SHORT).show();
 
         // Show a new game button!
-        
+        // TODO: Need to update the user when they start a new game with the game field.
+        // May also need to update the other user with the new game too
     }
 }

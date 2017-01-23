@@ -12,4 +12,5 @@
     <string name="your_turn">Your turn!!</string>
     <string name="you_lose">Game over, you\'ve lost.</string>
     <string name="opponent">Playing against: %s</string>
+    <string name="new_game">new game</string>
 </resources>

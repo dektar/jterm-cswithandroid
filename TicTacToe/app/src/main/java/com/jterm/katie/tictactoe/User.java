@@ -23,7 +23,7 @@ public class User {
     private String username;
     private String email;
     private int wins;
-    private ArrayList<String> currentGames;
+    private ArrayList<String> games;
 
     public User() {
     }
@@ -32,7 +32,7 @@ public class User {
         this.username = username;
         this.email = email;
         wins = 0;
-        currentGames = new ArrayList<>();
+        games = new ArrayList<>();
     }
 
     public String getUsername() {
@@ -55,11 +55,11 @@ public class User {
         this.wins = wins;
     }
 
-    public ArrayList<String> getCurrentGames() {
-        return currentGames;
+    public ArrayList<String> getGames() {
+        return games;
     }
 
-    public void setCurrentGames(ArrayList<String> currentGames) {
-        this.currentGames = currentGames;
+    public void setGames(ArrayList<String> currentGames) {
+        this.games = currentGames;
     }
 }

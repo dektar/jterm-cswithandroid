@@ -23,6 +23,7 @@ import org.w3c.dom.Text;
 
 import java.lang.annotation.Retention;
 import java.util.ArrayList;
+import java.util.Random;
 
 import static java.lang.annotation.RetentionPolicy.SOURCE;
 
@@ -50,9 +51,20 @@ public class Game {
 
     public Game(String player) {
         username_p1 = player;
-
-        // TODO: Initialize the board.
-        //board = new int[][]{{0, 0, 0}, {0, 0, 0}, {0, 0, 0}};
+        Random random = new Random();
+        turn = random.nextInt(2) + 1;
+        ArrayList<Integer> row1 = new ArrayList<>(3);
+        ArrayList<Integer> row2 = new ArrayList<>(3);
+        ArrayList<Integer> row3 = new ArrayList<>(3);
+        for (int i = 0; i < 3; i++) {
+            row1.add(0);
+            row2.add(0);
+            row3.add(0);
+        }
+        board = new ArrayList<>();
+        board.add(row1);
+        board.add(row2);
+        board.add(row3);
     }
 
     public ArrayList<ArrayList<Integer>> getBoard() {
